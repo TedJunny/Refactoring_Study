@@ -1,2 +1,1 @@
-# Refactoring_Study
-⟪Refactoring⟫ Book Study Archive Repository
+# ⟪Refactoring⟫ Book Study Log
