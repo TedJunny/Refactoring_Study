@@ -1,0 +1,9 @@
+{
+  "type": "module",
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "mocha": "^9.2.1"
+  }
+}
