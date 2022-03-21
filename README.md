@@ -7,3 +7,4 @@
 ## 📝 Table of Contents
 - [Chapter 03. 코드에서 나는 악취](Refactoring/Chapter03/README.md)
 - [Chapter 04. 테스트 구축하기](Refactoring/Chapter04/README.md)
+- [Chapter 07. 캡슐화](Refactoring/Chapter07-1/README.md)
