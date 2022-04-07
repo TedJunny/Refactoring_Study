@@ -138,7 +138,7 @@ function new_discount(inputValue, quantity) {
 const organization = { name: 'GloZ', country: 'KR' };
 
 ⬇ 리팩터링 후 ⬇
-1.
+1. 캡슐화 진행
 class Organization {
   constructor(data) {
     this._name = data.name;
