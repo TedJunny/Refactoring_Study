@@ -158,7 +158,7 @@ class Organization {
     this._country = data.country;
   }
 
-  get name() {return this._title;}
+  get name() {return this._title;} //getter, setter에서도 name -> title로 바꿔준다.
   set name(aString) {this._title = aString;}
   get country() {return this._country;}
   set country(aCountryCode) {this._country = aCountryCode;}
