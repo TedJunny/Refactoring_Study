@@ -45,7 +45,7 @@ function distanceTrabvelled(scenario, time) {
 
 function distanceTrabvelled(scenario, time) {
   let result;
-  let primaryAcceleration = scenario.primaryForce / scenario.mass; //1,2. 알맞는 이름으로 변경 + 불변으로 선언
+  const primaryAcceleration = scenario.primaryForce / scenario.mass; //1,2. 알맞는 이름으로 변경 + 불변으로 선언
   let primaryTime = Math.min(time, scenario.delay);
   result = 0.5 * primaryAcceleration * primaryTime * primaryTime; //3. 두번째 대입 전까지의 모든 참조를 새로운 이름으로 교체
   let secondaryTime = time - scenario.delay;
@@ -64,7 +64,7 @@ function distanceTrabvelled(scenario, time) {
 
 function distanceTrabvelled(scenario, time) {
   let result;
-  let primaryAcceleration = scenario.primaryForce / scenario.mass; //알맞는 이름으로 변경 + 불변으로 선언
+  const primaryAcceleration = scenario.primaryForce / scenario.mass; //알맞는 이름으로 변경 + 불변으로 선언
   let primaryTime = Math.min(time, scenario.delay);
   result = getDistance(primaryAcceleration, primaryTime); //전파된 거리 (0.5 * acceleraion * time * time)을 질의 함수로 추출
   let secondaryTime = time - scenario.delay;
@@ -163,7 +163,8 @@ class Organization {
   get country() {return this._country;}
   set country(aCountryCode) {this._country = aCountryCode;}
  }
- const organization = new Organization({ name: 'GloZ', country: 'KR' }) => new Organization({ title: 'GloZ', country: 'KR' });
+ const organization = new Organization({ name: 'GloZ', country: 'KR' }) //이 코드를 아래 코드로 수정해준다.
+ const organization = new Organization({ title: 'GloZ', country: 'KR' }) //name => title
 }
 
 3. fin.
