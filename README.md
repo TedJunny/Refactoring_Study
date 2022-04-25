@@ -17,3 +17,4 @@
 - [Chapter 09. 데이터 조직화](Refactoring/Chapter09/README.md)
 - [Chapter 10-1. 조건부 로직 간소화](Refactoring/Chapter10-1/README.md)
 - [Chapter 10-2. 조건부 로직 간소화](Refactoring/Chapter10-2/README.md)
+- [Chapter 12-2. 상속 다루기](Refactoring/Chpater12-2/README.md)
