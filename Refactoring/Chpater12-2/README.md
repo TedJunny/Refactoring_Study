@@ -7,6 +7,7 @@
 * 그런 다음 개별 서브 클래스를 하나씩 슈퍼클래스에 흡수시킨다.
 
 ### Code Example
+다음의 서브 클래스들을 살펴보자.
 ```js
 class Person {
     constructor(name) {
@@ -38,7 +39,7 @@ function createPerson(aRecord)
     switch (aRecord.gender) {
         case "M": p = new Male(aRecord.name); break;
         case "F": p = new Female(aRecord.name); break;
-        default: p = new Person(aRecord.name); break;
+        default: p = new Person(aRecord.name);
     }
     return p;
 
@@ -124,8 +125,140 @@ constructor(name, genderCode) {
     this._genderCode = genderCode;
 }
 ```
+<br>
+
+## 12.8 슈퍼클래스 추출하기
+
+* 비슷한 일을 수행하는 두 클래스가 보이면 상속 메커니즘을 적극 활용하도록 하자. 
+* 공통된 부분이 데이터이면 필드 올리기를 활용하고, 동작이라면 메서드 올리기를 활용하여 슈퍼 클래스를 추출하자.
+* 중복이 되는 코드를 클래스 추출하기로도 해결할 수 있다. 이는 중복을 위임으로 해결하느냐, 또는 상속으로 해결하느냐에 따라 달라지게 된다. <br> 
+슈퍼클래스 추출하기 방법이 더 간단한 경우가 많다.
+
+### Code Example
+다음의 두 클래스에서 공통된 기능을 슈퍼클래스 추출하는 기법을 통해 리팩터링 해보자.
+```js
+class Employee{
+    constructor(name, id, monthlyCost) {
+        this._id = id;
+        this._name = name;
+        this._monthlyCost = monthlyCost;
+    }
+    get monthlyCost() {return this._monthlyCost;} // 월간 비용
+    get name() {return this._name} // 이름
+    get id() {return this._id}
+
+    get annualCost() {      // 연간 비용  
+        return this._monthlyCost * 12;
+    }
+}
+
+class Department {
+    constructor(name, staff) {
+        this._name = name;
+        this._staff = staff;
+    }
+    get staff() {return this._staff.slice();}
+    get name() {return this._name;} // 이름
+
+    get totalMonthlyCost() {    // 총 월간 비용
+        return this._staff
+            .map(e => e.monthlyCost)
+            .reduce((sum, cost) => sum + cost);
+    }
+    get headCount() {
+        return this.staff.length;
+    }
+    get totalAnnualCost() {     // 총 연간 비용
+        return this.totalMonthlyCost * 12;
+    }
+}
+```
+
+공통된 성질과 동작을 포함시킬 슈퍼클래스를 생성하고, 두 클래스가 이를 확장하도록 한다.
+
+```js
+class Party {}
+
+class Employee extends Party {
+    constructor(name, id, monthlyCost) {
+        super();
+        this._id = id;
+        this._name = name;
+        this._monthlyCost = monthlyCost;
+    }
+    // 생략 ...
+}
+
+class Department extends Party {
+    constructor(name, staff) {
+        super();
+        this._name = name;
+        this._staff = staff;
+    }
+    // 생략 ...
+}
+```
+
+데이터들을 먼저 필드 올리기 기법으로 슈퍼클래스로 옮겨보자. 이때 생성자를 수정해야 한다. 그러고 나서 관련된 메서드를 올리는 리팩터링을 해보겠다.
+
+```js
+// Party 클래스 ...
+constructor(name) {
+    this._name = name;
+}
+
+get name() {return this._name;}
+
+// Employee 클래스 ...
+constructor (name, id, monthlyCost) {
+    super(name);
+    this._id = id;
+    this._monthlyCost = monthlyCost;
+}
+// get name() 함수 삭제
+
+// Department 클래스 ...
+constructor (name, staff) {
+    super(name);
+    this._staff = staff;
+}
+// get name() 함수 삭제
+```
+
+그 다음으로 구현 로직이 비슷한 연간 비용을 계산하는 로직을 슈퍼클래스에서 구현해보자. 그 전에 서브클래스의 함수 명칭을 통일시켜주자. 
+
+```js
+// Department 클래스 ...
+get annualCost() {
+    return this.monthlyCost * 12;
+}
+
+get monthlyCost() {...}
+
+// Party 클래스 ...
+get annualCost() {
+    return this.monthlyCost * 12;
+}
+```
+
+<br>
+
+## 12.9 계층 합치기
+
+* 클래스 계층구조를 리팩터링하다 보면 기능들을 위로 올리거나 아래로 내리는 일은 다반사로 벌어진다.
+* 어떤 클래스가 부모 클래스와 너무 비슷해져서 더는 독립적으로 존재해야 할 이유가 사라질 경우에는 둘을 하나로 합쳐라.
+
+<br>
+
+## 12.10 서브클래스를 위임으로 바꾸기
 
 
+
+<br>
+
+## 12.11 슈퍼클래스를 위임으로 바꾸기
+```js
+```
 
 ```js
 ```
