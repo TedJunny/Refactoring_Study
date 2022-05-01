@@ -252,20 +252,201 @@ get annualCost() {
 
 ## 12.10 서브클래스를 위임으로 바꾸기
 
+* 객체지향을 통해서 프로그램의 모든 문제점을 해결할 순 없다. 다중 상속이 허용되지 않는 프로그래밍 언어에서는 하나의 기준만으로 <br>
+어떤 부모클래스를 상속할지 결정해야 한다.
+* 상속은 클래스들의 결합도를 높이게 된다. 부모를 수정하면 이미 존재하는 자식들의 기능에 영향을 줄 수 있기 때문에 각별히 주의해야 한다.
+* 위임을 통해서 이 두 가지 문제를 해결할 수 있다. 위임을 통해 결합도를 낮추면서 객체 사이의 상호작용에 필요한 인터페이스를 명확히 정의할 <br>
+수 있다.
+* 서브클래스를 위임으로 바꾸는 작업은 쉽게 할 수 있다. 우선은 상속으로 문제를 해결하려고 접근하고, 문제가 생기기 시작하면 위임으로 변경해보라.
+
+### Code Example - 서브클래스가 하나일 때
+공연 예약 클래스와 그것을 상속하는 프리미엄 예약 클래스 코드를 통해 리팩터링 기법을 적용시키는 방법을 살펴보자.
+```js
+// Booking 클래스 ...
+constructor(show, date) {
+    this._show = show;
+    this._date = date;
+}
+
+get hasTalkback() {
+    return this._show.hasOwnProperty('talkback') && !this.isPeakDay;
+}
+
+get basePrice() {
+    let result = this._show.price;
+    if(this.isPeakDay) result += Math.round(result * 0.15);
+    return result;
+}
+
+// PremiumBooking 클래스 (Booking을 상속함)...
+constructor(show, date, extras) {
+    super(show, date);
+    this._extras = extras;
+}
+
+get hasTalkback() {
+    return this._show.hasOwnProperty('talkback')
+}
+
+get basePrice() {
+    return Math.round(super.basePrice + this._extras.premiumFee);
+}
+
+get hasDinner() {
+    return this._extras.hasOwnProperty('dinner')& !this.isPeakDay;
+}
+```
+위의 코드 예제에서는 상속이 잘 들어맞고 있다. 슈퍼클래스의 기능에서 수정이 필요한 부분은 서브클래스에서 오버라이드하고 있다. 또한 새롭게 필요한 <br>
+기능에 대해서는 메서드를 추가하는 식으로 상속을 활용하였다. <br>
+프리미엄 예약 클래스를 위임으로 변경하여 상속을 사용해야 할 다른 이유가 생기거나, 기본 예약에서 프리미엄 예약으로 동적으로 전환할 필요가 생길 경우를
+대비해보자.
+
+<br>
+우선 팩터리 함수로 생성자 호출 부분을 캡슐화하자.
+
+```js
+// 최상위 ...
+function createBooking(show, date) {
+    return new Booking(show, date);
+}
+
+function createPreminumBooking(show, date, extras) {
+    return new PremiumBooking(show, date, extras);
+}
+
+// 클라이언트 
+aBooking = createBooking(show, date);
+
+// 클라이언트
+aBooking = createPremiumBooking(show, date, extras);
+```
+
+이제 위임 클래스를 만든다. 위임 클래스의 생성자는 서브클래스가 사용하던 매개변수와 예약 객체로의 역참조를 매개변수로 받는다. 
+역참조가 필요한 이유는 서브클래스 메서드 중 슈퍼클래스에 저장된 데이터를 사용하는 경우가 있기 때문이다.
+
+```js
+// PremiumBookingDelegate 클래스 ...
+constructor(hostBooking, extras) {
+    this._host = hostBooking;
+    this._extras = extras;
+}
+```
+
+팩터리 함수를 수정하여 새로운 위임을 예약 객체와 연결해주자
+
+```js
+// 최상위 ...
+function createPremiumBooking(show, date, extras) {
+    const result = new PremiumBooking(show, date, extras);
+    result._bePremium(extras);
+    return result;
+}
+
+// Booking 클래스 ...
+_bePremium(extras) {
+    this._premiumDelegate = new PremiumBookingDelegate(this, extras);
+}
+```
+
+함수 옮기기를 적용해 서브클래스의 메서드를 위임으로 옮긴다. 기능이 잘 동작하는지 테스트 한 후에는 서브클래스의 메서드를 삭제한다.
+
+```js
+// PremiumBookingDelegate 클래스 ...
+get hasTalkback() {
+    return this._host._show.hasOwnProperty('talkback');
+}
+```
+
+위임이 존재하면 로직이 달라져야 하기 때문에 분배 로직을 슈퍼클래스 메서드에 추가한다. 이것을 끝으로 이번 메서드 옮기기 작업이
+끝나게 된다.
+
+```js
+// Booking 클래스 ...
+get hasTalkback() {
+    return (this._premiumDelegate)
+        ? this._premiumDelegate.hasTalkback
+        : this._show.hasOwnProperty('talkback') && !this.isPeakDay;
+}
+```
+
+기본 가격을 계산하는 로직을 위임으로 옮겨보자. 이때 무한 재귀에 빠지지 않도록 설계를 해야 하는데 두 가지 정도의 방법이 있다. <br>
+첫째는 슈퍼클래스의 계산 로직을 함수로 추출하여 가격 계산과 분배 로직을 분리하는 것이다.
+
+```js
+// Booking 클래스 ...
+get basePrice() {
+    return (this._premiumDelegate) 
+        ? this._premiumDelegate.basePrice
+        : this._privateBasePrice;
+}
+
+get _privateBasePrice() {
+    let result = this._show.price;
+    if(this.isPeakDay) result += Math.round(result * 0.15);
+    return result;
+}
+
+// PremiumBookingDelegate 클래스 ...
+get basePrice() {
+    return Math.round(this._host._privateBasePrice + this._extras.premiumFee);
+}
+```
+
+둘째, 위임의 메서드를 기반 메서드의 확장 형태로 재호출한다.
+
+```js
+// Booking 클래스 ...
+get basePrice() {
+    let result = this._show.price;
+    if(this.isPeakDay) result += Math.round(result * 0.15);
+    return (this._premiumDelegate) 
+        : this._premiumDelegate.extendBasePrice(result)
+        : result;
+}
+
+// PremiumBookingDelegate 클래스 ...
+extendedBasePrice(base) {
+    return Math.round(base + this._extras.premiumFee);
+}
+```
+
+마지막으로, 서브클래스에만 존재하는 메소드도 옮겨준다.
+
+```js
+// PremiumBookingDelegate 클래스 ...
+get hasDinner() {
+    return this._extras.hasOwnProperty('dinner') & !this._host.isPeakDay;
+}
+
+// Booking 클래스 ...
+get hasDinner() {
+    return (this._premiumDelegate)
+        : this._premiumDelegate.hasDinner
+        : undefined;
+}
+```
+
+마지막으로 팩터리 메서드가 슈퍼클래스를 반환하도록 수정한다. 테스트를 통해서 모든 기능이 잘 동작한다면 서브클래스를 삭제한다.
+
+```js
+function createPremiumBooking(show, date, extras) {
+    const result = new Booking(show, date);
+    result._bePremium(extras);
+    return result;
+}
+```
+
+이 리팩터링 그 자체만으로 코드를 개선한다고 느껴지지 않는다. 하지만 동적으로 프리미엄 예약을 바꿀 수 있는 장점이 생겼고, 상속은 다른
+목적으로 사용할 수 있게 되었다. 이 장점이 상속을 없애는 단점보다 클 수 있다.
+
+### Code Example 서브클래스가 여러 개일 때
 
 
 <br>
 
 ## 12.11 슈퍼클래스를 위임으로 바꾸기
-```js
-```
-
-```js
-```
 
 
-```js
-```
 
 
 ```js
