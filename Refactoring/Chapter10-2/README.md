@@ -263,7 +263,6 @@ function checkForMiscreants(people) {
 
 ```js
 function checkForMiscreants(people) {
-    let found = false;
     for (const p of people) {
         if (p === '조커') {
                 sendAlert();
