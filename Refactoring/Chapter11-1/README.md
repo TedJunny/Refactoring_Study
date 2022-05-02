@@ -412,3 +412,50 @@ targetTemperature(selectedTemperature) {
   else return selectedTemperature;
 }
 ```
+
+#### 11.7 세터 제거하기
+
+- 객체가 생성된 후 수정되지 않기를 원한다면 세터를 제거해야 한다.
+- 사용자들이 무조건 접근자 메서드(생성자 포함)를 통해서만 필드를 다루려고 할 때 생성자에서만 호출하는 세터가 생겨나곤 한다. 이 경우 불필요한 세터를 제거하여 값이 변하지 않도록 해야 한다.
+- 또한 클라이언트에서 생성 스크립트를 사용해 객체를 생성할 때 역시 세터를 제거하는 편이 좋다. 생성 스크립트란 생성자 호출 후 세터를 호출하여 객체를 완성하는 형태의 코드이다. 설계자는 스크립트가 완료된 후 객체의 일부나 전체가 변경되지 않으리라 기대하지만, 의도를 명확히 하기 위해 세터를 제거하는 편이 권장된다.
+
+**기본 절차**
+
+1. 설정해야 할 값을 생성자에서 받지 않을 경우, 그 값을 받을 매개변수를 생성자에 추가
+2. 생성자 밖에서 세터를 호출하는 곳을 찾아 제거, 새로운 생성자를 사용하도록 변경
+3. 수정될 때마다 테스트
+4. 세터 메서드를 인라인, 해당 필드를 불변으로 만들기
+5. 테스트
+
+**예시**
+
+```javascript
+// 기존 코드
+get name() {return this._name;}
+set name(arg) {this._name = arg;}
+get id() {return this._id;}
+set id(arg) {this._id = arg;}
+
+const martin = new Person();
+martin.name = "마틴";
+martin.id = '1234';
+
+// 1. 생성자에서 id를 받도록 변경
+constructor(id) {
+  this.id = id;
+}
+// 2. 생성 스크립트 수정
+const martin = new Person();
+martin.name = "마틴";
+//martin.id = '1234';
+
+// 3. 세터 메서드 인라인
+constructor(id) {
+  this._id = id;
+}
+
+get name() {return this._name;}
+set name(arg) {this._name = arg;}
+get id() {return this._id;}
+// set id(arg) {this._id = arg;}
+```
