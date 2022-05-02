@@ -439,15 +439,77 @@ function createPremiumBooking(show, date, extras) {
 이 리팩터링 그 자체만으로 코드를 개선한다고 느껴지지 않는다. 하지만 동적으로 프리미엄 예약을 바꿀 수 있는 장점이 생겼고, 상속은 다른
 목적으로 사용할 수 있게 되었다. 이 장점이 상속을 없애는 단점보다 클 수 있다.
 
-### Code Example 서브클래스가 여러 개일 때
-
-
 <br>
 
 ## 12.11 슈퍼클래스를 위임으로 바꾸기
 
+* 상속은 잘못 활용하게 되면 혼란과 복잡도를 키울 수 있다. 자바의 스택 클래스는 리스트를 상속하고 있는데, 리스트의 기능 중 스택 클래스에
+적용이 되지 않는 기능까지 노출이 되어 문제를 유발하고 있다. 
+* 제대로 된 상속이라면 서브클래스가 슈퍼클래스의 모든 기능을 사용함은 물론, 서브클래스의 인스턴스를 슈퍼클래스의 인스턴스로 취급할 수
+있어야 한다. 다시 말해, 슈퍼클래스가 사용되는 모든 곳에서 서브클래스의 인스턴스를 대신 사용해도 이상없이 동작해야 한다.
+* 이러한 원칙이 지켜지지 않을 때에는 상속을 버리고 위임으로 객체를 분리해야 한다.
+* 이처럼 슈퍼클래스를 위임으로 처리해야 하는 문제 상황에서 어떻게 대처할 수 있는지 이번 리팩터링 기법을 통해서 알아보자.
 
+### Code Example 
+고대 문서를 보관하고 있는 도서관 프로그래밍 코드를 통해서 리팩터링 기법을 어떻게 적용하는지 살펴보자. <br>
+문서의 id, 코드, 태그 정보를 가진 CatalogItem 클래스와 이를 상속하여 정기 세척 이력 내용을 추가한 Scroll 클래스
+를 통해 문서를 관리하고 있다.
+```js
+// CatalogItem 클래스 ...
+constructor (id, title, tags) {
+    this._id = id;
+    this._title = title;
+    this._tags = tags;
+}
 
+get id() {return this._id;}
+get title() {return this._title;}
+hasTag(arg) {return this._tags.includes(arg);}
+
+// Scroll 클래스(CatalogItem을 상속함) ...
+constructor(id, title, tags, dateLastCleaned) {
+    super(id, title, tags);
+    this._lastCleaned = dateLastCleaned;
+}
+
+needsCleaning(targetDate) {
+    const threshold = this.hasTag('revered') ? 700 : 1500;
+    return this.daysSinceLastCleaning(targetDate) > threshold;
+}
+
+daysSinceLastCleaning(targetDate) {
+    return this._lastCleaned.until(targetDate, ChronoUnit.DAYS);
+}
+```
+
+현재의 모델링에서 카탈로그 아이템과 스크롤의 관계를 참조를 이용해서 끊어보자. 가장 먼저 Scroll에 카탈로그 아이템을 참조하는
+속성을 만들고 슈퍼클래스의 인스턴스를 새로 하나 만들어 대입하자.
 
 ```js
+// Scroll 클래스(CatalogItem을 상속함) ...
+constructor(id, title, tags, dateLastCleaned) {
+    super(id, title, tags);
+    this._catalogItem = new CatalogItem(id, title, tags);
+    this._lastCleaned = dateLastCleaned;
+}
+```
+
+그런 다음 이 서브클래스에서 사용하는 슈퍼클래스의 동작 각각에 대응하는 전달 메서드를 만든다.
+
+```js
+// Scroll 클래스 ...
+get id() {return this._catalogItem.id;}
+get title() {return this._catalogItem.title;}
+hasTag(aString) {return this._catalogItem.hasTag(aString);}
+```
+
+그러고 난 후 카탈로그 아이템과의 상속 관계를 끊을 수 있다.
+
+```js
+class Scroll {
+    constructor(id, title, dateLastCleaned) {
+        this._catalogItem = new CatalogItem(id, title, tags);
+        this._lastCleaned = dateLastCleaned;
+    }
+}
 ```
