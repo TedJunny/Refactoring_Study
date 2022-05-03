@@ -211,7 +211,7 @@ class Department extends Party {
 - 이런 경우라면 먼저 공통 코드를 함수로 추출한다.
 
 ```js
-class Employee extends Party {
+class Employee {
   constructor(name) {
     this._name = name;
   }
