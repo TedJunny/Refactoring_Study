@@ -13,4 +13,8 @@
 - [Chapter 07-1. 캡슐화-1](Refactoring/Chapter07-1/README.md)
 - [Chapter 07-2. 캡슐화-2](Refactoring/Chapter07-2/README.md)
 - [Chapter 08-1. 기능 이동-1](Refactoring/Chapter08-1/README.md)
+- [Chapter 08-2. 기능 이동-2](Refactoring/Chapter08-2/README.md)
 - [Chapter 09. 데이터 조직화](Refactoring/Chapter09/README.md)
+- [Chapter 10-1. 조건부 로직 간소화](Refactoring/Chapter10-1/README.md)
+- [Chapter 10-2. 조건부 로직 간소화](Refactoring/Chapter10-2/README.md)
+- [Chapter 12-2. 상속 다루기](Refactoring/Chpater12-2/README.md)
