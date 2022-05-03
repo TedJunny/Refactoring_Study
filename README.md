@@ -1,8 +1,21 @@
 <div align=center>
-<img src="./images/refactoring-icon.webp" width="300" height="300"> </br>
+<img src="./images/refactoring-icon.webp" width="300" height="300">
 </div>
 
 # ⟪Refactoring⟫ Book Study Log
+<div align=center>
+
+<br>
+  
+[![Contributor](https://contrib.rocks/image?repo=TedJunny/Refactoring_Study)](https://github.com/TedJunny/Refactoring_Study/graphs/contributors)
+
+<br>
+  
+</div>
+
+> 해당 Repository 에 기여를 해주신 분들입니다. 감사합니다. :pray:
+
+<br>
 
 ## 📝 Table of Contents
 
